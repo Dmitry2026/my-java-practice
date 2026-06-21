@@ -1,48 +1,37 @@
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Scanner;
+import java.math.RoundingMode;
+class Main{
+    public static void main(String[]args){
+        Scanner scanner=new Scanner (System.in);
+        DecimalFormat df =new DecimalFormat("#,##0.00)");
+        Wallet wallet=new Wallet();
+        System.out.println("<<<Т-Система : Логистика транзикций>>>");
+        while(true){
+            System.out.print("Категория(или 'exit):");
+            String cat=scanner.nextLine();
+            if ( cat.equalsIgnoreCase("exit"))break;
+            System.out.print("Сумма:");
+            String sum=scanner.nextLine().replace(',','.').trim();
+            try{
+                BigDecimal money= new BigDecimal(sum).setScale(2, RoundingMode.HALF_UP);
+                Transaction transaction= new Transaction(cat, money);
+                wallet.addTransaction(transaction);
+                System.out.println("Объект Transaction  успешно добавлен в память");
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        ArrayList<Transaction> history = new ArrayList<>();
-        DecimalFormat df = new DecimalFormat("#,##0.00");
 
-        System.out.println("<<<Т-Система: Логистики транзикций>>>");
-
-        while (true) {
-            System.out.println("Катерогория ( или 'exit'): ");
-            String cat = scanner.nextLine();
-
-            if (cat.equalsIgnoreCase("exit")) break;
-
-            System.out.println("Сумма: ");
-            String sumStr = scanner.nextLine().replace(',', '.').trim();
-
-            try {
-                BigDecimal money = new BigDecimal(sumStr).setScale(2, RoundingMode.HALF_UP);
-                Transaction th = new Transaction(cat, money);
-                history.add(th);
-                System.out.println("Объек Transaction успешно добавлен в память.");
-            } catch (NumberFormatException | ArithmeticException e) {
-                System.out.println("Ошибка парсинга суммы. Попробуйте еще раз.");
-                System.out.println();
+            }catch( NumberFormatException|ArithmeticException e){
+                System.out.println("Ошибка парсинга суммы. Повторите попытку ");
             }
-
-
-            System.out.println("\n<<<Выгрузка транзикций из сети>>>");
-            BigDecimal total = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-
-            for (Transaction t : history) {
-                System.out.println("Транзикция >>> Категория: " + t.getCategory() + " | Сумма: " + df.format(t.getAmount()) + " руб.");
-                total = total.add(t.getAmount());
-            }
-
-            System.out.println("Итого обработанона сумму: " + df.format(total) + " руб.");
+        }
+        System.out.println("\n<<<Выгрузка транзикций из сети >>>");
+        for (Transaction t: wallet.getHistory()){
+            System.out.println("Транзикция >>> Категория : "+t.getCategory()+"|Сумма:"+df.format(t.getAmount()));
 
         }
+        System.out.println("Итого обработаносуммы:"+df.format(wallet.getTotalSum()));
         scanner.close();
+    
     }
 }
